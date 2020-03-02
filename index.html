@@ -13,10 +13,10 @@
 
     </head>
 
-    <body>
+    <body class="m-0">
 
-        <!-- Navbar -->
-        <div class="navbar navbar-expand navbar-dark bg-primary">
+        <!-- Navbar (Does not print) -->
+        <div class="navbar navbar-expand navbar-dark bg-primary d-print-none">
 
             <!-- Brand -->
             <div class="navbar-brand">TheBluePrint</div>
@@ -30,10 +30,44 @@
                 <!-- Form -->
                 <form class="form-inline my-2 my-lg-0">
                     <input class="form-control mr-sm-2 text-primary border-white" type="search" autocomplete="off" placeholder="Team Number" id="team-input" name="team">
+                    <input class="form-control mr-sm-2 text-primary border-white" type="search" autocomplete="off" placeholder="Event Key" id="event-input" name="event">
                     <button class="btn text-primary btn-light my-2 my-sm-0" type="submit">Search</button>
                 </form>
 
             </div>
+
+        </div>
+
+        <!-- Info Container -->
+        <div class="container p-5">
+
+            <!-- Header (Replaces navbar in printing) -->
+            <div class="p-2 m-0 d-none d-print-block border border-bottom border-dark">
+                <h1>TheBluePrint</h1>
+                <p>
+                    <span id="event-name"></span>,
+                    <span id="event-city"></span>,
+                    <span id="event-state"></span>
+                    (<span id="event-start"></span> to <span id="event-end"></span>)
+                </p>
+            </div>
+
+            <!-- Match List -->
+            <table class="table table-striped table-hover border">
+
+                <!-- Header -->
+                <thead>
+                    <tr>
+                        <th scope="col" class="border-right">Match</th>
+                        <th scope="col" colspan="3" class="border-right">Red Alliance</th>
+                        <th scope="col" colspan="3">Blue Alliance</th>
+                    </tr>
+                </thead>
+
+                <!-- Body -->
+                <tbody id="match-list"></tbody>
+
+            </table>
 
         </div>
 
@@ -45,22 +79,70 @@
         <!-- Interface Script -->
         <script>
 
+            // Team formatting function.
+            function formatTeam(key) {
+                if (key == undefined || key == null || key == '') key = 'frcN/A';
+                key = key.replace('frc', '');
+                if (key == teamNumber) return `<strong>${key}</strong>`;
+                else return key;
+            }
+
             // Storage.
             if (!localStorage.getItem('lastTeam')) { localStorage.setItem('lastTeam', String(5980)) }
-            let lastTeam = Number(localStorage.getItem('lastTeam'));
+            if (!localStorage.getItem('lastEvent')) { localStorage.setItem('lastEvent', 'misjo') }
+            var lastTeam = Number(localStorage.getItem('lastTeam'));
+            var lastEvent = localStorage.getItem('lastEvent');
 
             // URL parameters.
-            let urlParams = new URL(window.location.href).searchParams;
-            let teamNumber = (urlParams.get('team') == null) ? lastTeam : Number(urlParams.get('team'));
+            var urlParams = new URL(window.location.href).searchParams;
+            var teamNumber = (urlParams.get('team') == null) ? lastTeam : Number(urlParams.get('team'));
+            var eventKey = (urlParams.get('event') == null) ? lastEvent : urlParams.get('event');
 
             // Autofilling & Restorage.
             $('#team-input').val(teamNumber);
+            $('#event-input').val(eventKey);
+            $('#team-header').text(teamNumber);
             localStorage.setItem('lastTeam', String(teamNumber));
+            localStorage.setItem('lastEvent', eventKey);
 
             // API config.
-            let publicKey = 'dNxAgQWO2qmiRwgMNa8EjbDzbjvRIgv2cJ9yMTpZhIFkNJh7tCBsrOEHNWkZ1TZx';
-            let baseUrl = 'https://www.thebluealliance.com/api/v3';
-            let teamKey = 'frc' + String(teamNumber);
+            var apiKey = 'dNxAgQWO2qmiRwgMNa8EjbDzbjvRIgv2cJ9yMTpZhIFkNJh7tCBsrOEHNWkZ1TZx';
+            var baseUrl = 'https://www.thebluealliance.com/api/v3';
+            var teamKey = 'frc' + String(teamNumber);
+
+            // After a delay, gather information.
+            setTimeout(function() {
+
+                // Team number.
+                $('#event-team').text(teamNumber);
+
+                // Event Information.
+                $.getJSON(`${baseUrl}/event/${eventKey}/simple?X-TBA-Auth-Key=${apiKey}`, function(data) {
+                    $('#event-name').text(data.name);
+                    $('#event-city').text(data.city);
+                    $('#event-state').text(data.state_prov);
+                    $('#event-start').text(new Date(data.start_date).toLocaleDateString());
+                    $('#event-end').text(new Date(data.end_date).toLocaleDateString());
+                });
+
+                // Match List.
+                $.getJSON(`${baseUrl}/event/${eventKey}/matches/simple?X-TBA-Auth-Key=${apiKey}`, function(data) {
+                    let match;
+                    for (let i=0; i<data.length; i++) {
+                        match = data[i];
+                        $('#match-list').append(`<tr>`+
+                            `<th scope="col" class="border-right">${match.comp_level.toUpperCase()} ${match.match_number}</th>`+
+                            `<td>${formatTeam(match.alliances.red.team_keys[0])}</td>`+
+                            `<td>${formatTeam(match.alliances.red.team_keys[1])}</td>`+
+                            `<td class="border-right">${formatTeam(match.alliances.red.team_keys[2])}</td>`+
+                            `<td>${formatTeam(match.alliances.blue.team_keys[0])}</td>`+
+                            `<td>${formatTeam(match.alliances.blue.team_keys[1])}</td>`+
+                            `<td>${formatTeam(match.alliances.blue.team_keys[2])}</td>`+
+                        `</tr>`);
+                    }
+                });
+
+            }, 1000);
             
         </script>
 
