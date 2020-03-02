@@ -19,17 +19,19 @@
         <div class="navbar navbar-expand navbar-dark bg-primary">
 
             <!-- Brand -->
-            <a class="navbar-brand" href="#">TheBluePrint</a>
+            <div class="navbar-brand">TheBluePrint</div>
 
-            <!-- Nav -->
+            <!-- Team Number Input -->
             <div class="collapse navbar-collapse">
 
-                <!-- Refresh Link -->
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="./index.html">Refresh</a>
-                    </li>
-                </ul>
+                <!-- Dummy Nav -->
+                <ul class="navbar-nav mr-auto"></ul>
+
+                <!-- Form -->
+                <form class="form-inline my-2 my-lg-0">
+                    <input class="form-control mr-sm-2 text-primary border-white" type="search" autocomplete="off" placeholder="Team Number" id="team-input" name="team">
+                    <button class="btn text-primary btn-light my-2 my-sm-0" type="submit">Search</button>
+                </form>
 
             </div>
 
@@ -43,21 +45,22 @@
         <!-- Interface Script -->
         <script>
 
-            // API config.
-            let publicKey = 'dNxAgQWO2qmiRwgMNa8EjbDzbjvRIgv2cJ9yMTpZhIFkNJh7tCBsrOEHNWkZ1TZx';
-            let baseUrl = 'https://www.thebluealliance.com/api/v3';
+            // Storage.
+            if (!localStorage.getItem('lastTeam')) { localStorage.setItem('lastTeam', String(5980)) }
+            let lastTeam = Number(localStorage.getItem('lastTeam'));
 
             // URL parameters.
             let urlParams = new URL(window.location.href).searchParams;
-            let teamNumber = (urlParams.get('team') == null) ? 5980 : Number(urlParams.get('team'));
+            let teamNumber = (urlParams.get('team') == null) ? lastTeam : Number(urlParams.get('team'));
 
-            // Window load.
-            window.onload = function() {
+            // Autofilling & Restorage.
+            $('#team-input').val(teamNumber);
+            localStorage.setItem('lastTeam', String(teamNumber));
 
-                // API config.
-                let teamKey = 'frc' + String(teamNumber);
-
-            };
+            // API config.
+            let publicKey = 'dNxAgQWO2qmiRwgMNa8EjbDzbjvRIgv2cJ9yMTpZhIFkNJh7tCBsrOEHNWkZ1TZx';
+            let baseUrl = 'https://www.thebluealliance.com/api/v3';
+            let teamKey = 'frc' + String(teamNumber);
             
         </script>
 
