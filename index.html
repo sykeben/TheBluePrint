@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <!-- Meta -->
+        <meta charset="utf-8">
+        <title>TheBluePrint</title>
+
+        <!-- Vendor -->
+        <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
+
+    </head>
+
+    <body>
+
+        <!-- Navbar -->
+        <div class="navbar navbar-expand navbar-dark bg-primary">
+
+            <!-- Brand -->
+            <a class="navbar-brand" href="#">TheBluePrint</a>
+
+            <!-- Nav -->
+            <div class="collapse navbar-collapse">
+
+                <!-- Refresh Link -->
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="./index.html">Refresh</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <!-- Vendor -->
+        <script src="vendor/jquery/jquery.min.js"></script>
+        <script src="vendor/popper/popper.min.js"></script>
+        <script src="vendor/bootstrap/bootstrap.min.js"></script>
+
+        <!-- Interface Script -->
+        <script>
+
+            // API config.
+            let publicKey = 'dNxAgQWO2qmiRwgMNa8EjbDzbjvRIgv2cJ9yMTpZhIFkNJh7tCBsrOEHNWkZ1TZx';
+            let baseUrl = 'https://www.thebluealliance.com/api/v3';
+
+            // URL parameters.
+            let urlParams = new URL(window.location.href).searchParams;
+            let teamNumber = (urlParams.get('team') == null) ? 5980 : Number(urlParams.get('team'));
+
+            // Window load.
+            window.onload = function() {
+
+                // API config.
+                let teamKey = 'frc' + String(teamNumber);
+
+            };
+            
+        </script>
+
+    </body>
+
+</html>
