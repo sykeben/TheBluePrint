@@ -59,6 +59,7 @@
                 <thead>
                     <tr>
                         <th scope="col" class="border-right">Match</th>
+                        <th scope="col" class="border-right">Time</th>
                         <th scope="col" colspan="3" class="border-right">Red Alliance</th>
                         <th scope="col" colspan="3">Blue Alliance</th>
                     </tr>
@@ -85,6 +86,35 @@
                 key = key.replace('frc', '');
                 if (key == teamNumber) return `<strong>${key}</strong>`;
                 else return key;
+            }
+
+            // Match item generator.
+            function generateMatchItems(input) {
+                let out = "";
+                for (let i=0; i<input.length; i++) {
+                    if (input[i] != undefined) {
+                        out += `<tr>`+
+                            `<th scope="col" class="border-right">${input[i].comp_level.toUpperCase()} ${input[i].match_number}</th>`+
+                            `<td class="border-right">${new Date(input[i].time*1000).toLocaleTimeString()}</td>`+
+                            `<td>${formatTeam(input[i].alliances.red.team_keys[0])}</td>`+
+                            `<td>${formatTeam(input[i].alliances.red.team_keys[1])}</td>`+
+                            `<td class="border-right">${formatTeam(input[i].alliances.red.team_keys[2])}</td>`+
+                            `<td>${formatTeam(input[i].alliances.blue.team_keys[0])}</td>`+
+                            `<td>${formatTeam(input[i].alliances.blue.team_keys[1])}</td>`+
+                            `<td>${formatTeam(input[i].alliances.blue.team_keys[2])}</td>`+
+                        `</tr>`;
+                    }
+                }
+                return out;
+            }
+
+            // Match sorter.
+            function sortMatches(input) {
+                let out = new Array(input.length);
+                for (let i=0; i<input.length; i++) {
+                    out[input[i].match_number-1] = input[i];
+                }
+                return out;
             }
 
             // Storage.
@@ -127,20 +157,35 @@
 
                 // Match List.
                 $.getJSON(`${baseUrl}/event/${eventKey}/matches/simple?X-TBA-Auth-Key=${apiKey}`, function(data) {
-                    let match; let list;
+
+                    // Data structure.
+                    let matches = { qm: [], qf: [], sf: [], ff: [] };
+
+                    // Catagorize.
                     for (let i=0; i<data.length; i++) {
-                        match = data[i];
-                        list += `<tr>`+
-                            `<th scope="col" class="border-right">${match.comp_level.toUpperCase()} ${match.match_number}</th>`+
-                            `<td>${formatTeam(match.alliances.red.team_keys[0])}</td>`+
-                            `<td>${formatTeam(match.alliances.red.team_keys[1])}</td>`+
-                            `<td class="border-right">${formatTeam(match.alliances.red.team_keys[2])}</td>`+
-                            `<td>${formatTeam(match.alliances.blue.team_keys[0])}</td>`+
-                            `<td>${formatTeam(match.alliances.blue.team_keys[1])}</td>`+
-                            `<td>${formatTeam(match.alliances.blue.team_keys[2])}</td>`+
-                        `</tr>`;
+                        let type = data[i].comp_level;
+                        if (type == 'qm') matches.qm.push(data[i]);
+                        if (type == 'qf') matches.qf.push(data[i]);
+                        if (type == 'sf') matches.sf.push(data[i]);
+                        if (type ==  'f') matches.ff.push(data[i]);
                     }
-                    $('#match-list').append(list);
+
+                    // Sort.
+                    matches.qm = sortMatches(matches.qm);
+                    matches.qf = sortMatches(matches.qf);
+                    matches.sf = sortMatches(matches.sf);
+                    matches.ff = sortMatches(matches.ff);
+
+                    // Generate.
+                    let output;
+                    output += generateMatchItems(matches.qm);
+                    output += generateMatchItems(matches.qf);
+                    output += generateMatchItems(matches.sf);
+                    output += generateMatchItems(matches.ff);
+
+                    // Append.
+                    $('#match-list').append(output);
+
                 });
 
             }, 1000);
