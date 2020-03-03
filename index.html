@@ -127,10 +127,10 @@
 
                 // Match List.
                 $.getJSON(`${baseUrl}/event/${eventKey}/matches/simple?X-TBA-Auth-Key=${apiKey}`, function(data) {
-                    let match;
+                    let match; let list;
                     for (let i=0; i<data.length; i++) {
                         match = data[i];
-                        $('#match-list').append(`<tr>`+
+                        list += `<tr>`+
                             `<th scope="col" class="border-right">${match.comp_level.toUpperCase()} ${match.match_number}</th>`+
                             `<td>${formatTeam(match.alliances.red.team_keys[0])}</td>`+
                             `<td>${formatTeam(match.alliances.red.team_keys[1])}</td>`+
@@ -138,8 +138,9 @@
                             `<td>${formatTeam(match.alliances.blue.team_keys[0])}</td>`+
                             `<td>${formatTeam(match.alliances.blue.team_keys[1])}</td>`+
                             `<td>${formatTeam(match.alliances.blue.team_keys[2])}</td>`+
-                        `</tr>`);
+                        `</tr>`;
                     }
+                    $('#match-list').append(list);
                 });
 
             }, 1000);
