@@ -118,7 +118,7 @@ loadCurrent++;
 
 // MapQuest API config (key is public and will be removed if abused).
 var mapApiKey = encodeURI('IlppK5fQWTtimnCjT6ww8PwG3c7f3GrQ');
-var mapBaseUrl = 'https://open.mapquestapi.com/directions/v2';
+var mapBaseUrl = 'https://www.mapquestapi.com/directions/v2';
 loadCurrent++;
 
 // After a small delay, gather information.
