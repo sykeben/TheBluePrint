@@ -49,7 +49,7 @@ function formatAddress(address, city, stateProv) {
 }
 
 // Load checker & vars.
-const loadItems = 11; var loadCurrent = 0;
+const loadItems = 14; var loadCurrent = 0;
 function loadChecker() {
     if (loadCurrent == loadItems) {
         $('.container#loader').fadeOut('0.5s', function() {
@@ -123,6 +123,20 @@ setTimeout(function() {
     $('#event-team').text(teamNumber);
     loadCurrent++;
 
+    // QR Code: Team Page.
+    new QRCode(document.getElementById('qr-team'), {
+        text: `https://thebluealliance.com/team/${teamNumber}/${eventKey.substr(0,4)}#${eventKey}`,
+        colorDark: "#212529", colorLight: "#ffffff"
+    });
+    loadCurrent++;
+
+    // QR Code: Event Page.
+    new QRCode(document.getElementById('qr-event'), {
+        text: `https://thebluealliance.com/event/${eventKey}`,
+        colorDark: "#212529", colorLight: "#ffffff"
+    });
+    loadCurrent++;
+
     // Event Information & Directions.
     $.getJSON(`${tbaBaseUrl}/event/${eventKey}?X-TBA-Auth-Key=${tbaApiKey}`, function(data) {
 
@@ -140,6 +154,13 @@ setTimeout(function() {
             // Format Addresses.
             let startAddress = formatAddress(teamData.address, teamData.city, teamData.state_prov);
             let endAddress = formatAddress(data.address, data.city, data.state_prov);
+            loadCurrent++;
+
+            // QR Code: Directions.
+            let directionQR = new QRCode(document.getElementById('qr-directions'), {
+                text: `https://www.mapquest.com/directions?saddr=${encodeURI(startAddress)}&daddr=${encodeURI(endAddress)}`,
+                colorDark: "#212529", colorLight: "#ffffff"
+            });
             loadCurrent++;
 
             // Show.

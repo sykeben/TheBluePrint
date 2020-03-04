@@ -2,5 +2,15 @@
 .direction-icon-wrapper { min-width: 40px; display: inline-block; text-align: center; }
 .direction-icon { padding: 0; margin: 0; vertical-align: middle; image-rendering: crisp-edges; }
 
-/* Slight Font Increase */
+/* Font Increases */
 .font-slightly-bigger { font-size: 1.125em; }
+.font-bigger { font-size: 1.25em; }
+
+/* QR Codes */
+.qr-code img, .qr-code canvas {
+    border-radius: 3px;
+    margin: auto;
+    width: 100%; max-width: 256px;
+    image-rendering: crisp-edges;
+}
+.qr-text, .qr-code { text-align: center !important; }
