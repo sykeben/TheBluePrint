@@ -56,10 +56,13 @@
         </div>
 
         <!-- Loader Container -->
-        <div class="container p-5 m-5 vw100" id="loader">
+        <div class="container p-5 vw100" id="loader">
             
             <!-- Header -->
-            <h1 class="text-center">Loading... <span id="loader-precent">0</span>%</h1>
+            <h1>Loading: <span id="loader-precent">0</span>%</h1>
+
+            <!-- Appended Info -->
+            <p class="lead" id="loader-message" style="display: none;"></p>
 
         </div>
 
@@ -210,8 +213,22 @@
             }
 
             // Load updater.
+            var loadUpdateCount = 0;
             function loadUpdater() {
+                loadUpdateCount++
                 $('#loader-precent').text(Math.round((loadCurrent/loadItems)*100));
+                if (loadUpdateCount % 30 == 0) {
+                    $('#loader-message').fadeOut('0.5s', function() {
+                        $('#loader-message').text('Something may have broke.');
+                        $('#loader-message').fadeIn('0.5s');
+                    });
+                }
+                if (loadUpdateCount % 60 == 0) {
+                    $('#loader-message').fadeOut('0.5s', function() {
+                        $('#loader-message').text('Try reloading the page.');
+                        $('#loader-message').fadeIn('0.5s');
+                    });
+                }
             }
 
             // Storage.
