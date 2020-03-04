@@ -1,6 +1,10 @@
 /* Direction Icons */
 .direction-icon-wrapper { min-width: 40px; display: inline-block; text-align: center; }
-.direction-icon { padding: 0; margin: 0; vertical-align: middle; image-rendering: crisp-edges; }
+.direction-icon {
+    padding: 0; margin: 0;
+    vertical-align: middle;
+    max-width: 32px; max-height: 32px;
+}
 
 /* Font Increases */
 .font-slightly-bigger { font-size: 1.125em; }

@@ -193,7 +193,7 @@ setTimeout(function() {
                         if (maneuvers[i])
                         output += `<div class="my-2">`+
                             `<div class="direction-icon-wrapper mr-1">`+
-                                `<img src="${maneuvers[j].iconUrl}" class="direction-icon">`+
+                                `<img src="icons/turn-${maneuvers[j].turnType}.png" class="direction-icon">`+
                             `</div>`+
                             `<span class="${(j == maneuvers.length-1 || j == 0) ? 'font-weight-bold' : 'font-weight-normal'}">`+
                                 `${maneuvers[j].narrative}`+
