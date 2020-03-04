@@ -160,33 +160,45 @@
                 // Match List.
                 $.getJSON(`${baseUrl}/event/${eventKey}/matches/simple?X-TBA-Auth-Key=${apiKey}`, function(data) {
 
-                    // Data structure.
-                    let matches = { qm: [], qf: [], sf: [], ff: [] };
+                    // Empty check.
+                    if (data.length > 0) {
 
-                    // Catagorize.
-                    for (let i=0; i<data.length; i++) {
-                        let type = data[i].comp_level;
-                        if (type == 'qm') matches.qm.push(data[i]);
-                        if (type == 'qf') matches.qf.push(data[i]);
-                        if (type == 'sf') matches.sf.push(data[i]);
-                        if (type ==  'f') matches.ff.push(data[i]);
+                        // Data structure.
+                        let matches = { qm: [], qf: [], sf: [], ff: [] };
+
+                        // Catagorize.
+                        for (let i=0; i<data.length; i++) {
+                            let type = data[i].comp_level;
+                            if (type == 'qm') matches.qm.push(data[i]);
+                            if (type == 'qf') matches.qf.push(data[i]);
+                            if (type == 'sf') matches.sf.push(data[i]);
+                            if (type ==  'f') matches.ff.push(data[i]);
+                        }
+
+                        // Sort.
+                        matches.qm = sortMatches(matches.qm);
+                        matches.qf = sortMatches(matches.qf);
+                        matches.sf = sortMatches(matches.sf);
+                        matches.ff = sortMatches(matches.ff);
+
+                        // Generate.
+                        let output;
+                        output += generateMatchItems(matches.qm);
+                        output += generateMatchItems(matches.qf);
+                        output += generateMatchItems(matches.sf);
+                        output += generateMatchItems(matches.ff);
+
+                        // Append.
+                        $('#match-list').append(output);
+
+                    } else {
+
+                        // Append error.
+                        $('#match-list').append('<tr><td colspan="8">No Data Found</td></tr>')
+
                     }
 
-                    // Sort.
-                    matches.qm = sortMatches(matches.qm);
-                    matches.qf = sortMatches(matches.qf);
-                    matches.sf = sortMatches(matches.sf);
-                    matches.ff = sortMatches(matches.ff);
-
-                    // Generate.
-                    let output;
-                    output += generateMatchItems(matches.qm);
-                    output += generateMatchItems(matches.qf);
-                    output += generateMatchItems(matches.sf);
-                    output += generateMatchItems(matches.ff);
-
-                    // Append.
-                    $('#match-list').append(output);
+                    console.log(data);
 
                 });
 
