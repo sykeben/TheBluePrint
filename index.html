@@ -12,6 +12,18 @@
         <!-- Vendor -->
         <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
 
+        <!-- Interface Styling -->
+        <style>
+
+            /* Direction Icons */
+            .direction-icon-wrapper { min-width: 40px; display: inline-block; text-align: center; }
+            .direction-icon { padding: 0; margin: 0; vertical-align: middle; image-rendering: crisp-edges; }
+
+            /* Slight Font Increase */
+            .font-slightly-bigger { font-size: 1.125em; }
+
+        </style>
+
     </head>
 
     <body class="m-0">
@@ -45,36 +57,77 @@
         </div>
 
         <!-- Info Container -->
-        <div class="container p-5">
+        <div class="container px-5 pt-1 pb-4">
 
             <!-- Header (Replaces navbar in printing) -->
             <div class="p-2 m-0 d-none d-print-block">
+
+                <!-- Title -->
                 <h1>TheBluePrint</h1>
+
+                <!-- Event Info -->
                 <p>
                     <span id="event-name"></span>,
                     <span id="event-city"></span>,
                     <span id="event-state"></span>
                     (<span id="event-start"></span> to <span id="event-end"></span>)
                 </p>
+
+            </div>
+
+            <!-- Directions -->
+            <div class="pt-4 mt-4">
+
+                <!-- Header -->
+                <h2>Directions</h2>
+
+                <!-- Info -->
+                <table class="table table-borderless table-responsive table-sm font-slightly-bigger">
+
+                    <!-- From -->
+                    <tr>
+                        <td>From</td>
+                        <td class="font-italic" id="start-address">Somewhere</td>
+                    </tr>
+
+                    <!-- To -->
+                    <tr>
+                        <td>To</td>
+                        <td class="font-italic" id="end-address">Elsewhere</td>
+                    </tr>
+
+                </table>
+
+                <!-- List -->
+                <div class="mt-n2" id="directions-list"></div>
+
             </div>
 
             <!-- Match List -->
-            <table class="table table-striped table-hover border">
+            <div class="pt-4 mt-4">
 
                 <!-- Header -->
-                <thead>
-                    <tr>
-                        <th scope="col" class="border-right">Match</th>
-                        <th scope="col" class="border-right">Time</th>
-                        <th scope="col" colspan="3" class="border-right">Red Alliance</th>
-                        <th scope="col" colspan="3">Blue Alliance</th>
-                    </tr>
-                </thead>
+                <h2>Matches</h2>
 
-                <!-- Body -->
-                <tbody id="match-list"></tbody>
+                <!-- List -->
+                <table class="table table-striped table-hover border">
 
-            </table>
+                    <!-- Header -->
+                    <thead>
+                        <tr>
+                            <th scope="col" class="border-right">Match</th>
+                            <th scope="col" class="border-right">Time</th>
+                            <th scope="col" colspan="3" class="border-right">Red Alliance</th>
+                            <th scope="col" colspan="3">Blue Alliance</th>
+                        </tr>
+                    </thead>
+
+                    <!-- Body -->
+                    <tbody id="match-list"></tbody>
+
+                </table>
+
+            </div>
 
         </div>
 
@@ -123,6 +176,19 @@
                 return out;
             }
 
+            // Address formatter.
+            function formatAddress(address, city, stateProv) {
+                let output = '';
+                if (address) {
+                    output += address;
+                } else {
+                    if (city) output += city;
+                    if ((city && stateProv) || (address && stateProv)) output += ', ' + stateProv;
+                    else if (stateProv) output += stateProv;
+                }
+                return output;
+            }
+
             // Storage.
             if (!localStorage.getItem('lastTeam')) { localStorage.setItem('lastTeam', String(5980)) }
             if (!localStorage.getItem('lastEvent')) { localStorage.setItem('lastEvent', '2020misjo') }
@@ -141,10 +207,14 @@
             localStorage.setItem('lastTeam', String(teamNumber));
             localStorage.setItem('lastEvent', eventKey);
 
-            // API config.
-            var apiKey = 'dNxAgQWO2qmiRwgMNa8EjbDzbjvRIgv2cJ9yMTpZhIFkNJh7tCBsrOEHNWkZ1TZx';
-            var baseUrl = 'https://www.thebluealliance.com/api/v3';
+            // TBA API config (key is public and will be removed if abused).
+            var tbaApiKey = encodeURI('dNxAgQWO2qmiRwgMNa8EjbDzbjvRIgv2cJ9yMTpZhIFkNJh7tCBsrOEHNWkZ1TZx');
+            var tbaBaseUrl = 'https://www.thebluealliance.com/api/v3';
             var teamKey = 'frc' + String(teamNumber);
+
+            // MapQuest API config (key is public and will be removed if abused).
+            var mapApiKey = encodeURI('IlppK5fQWTtimnCjT6ww8PwG3c7f3GrQ');
+            var mapBaseUrl = 'https://open.mapquestapi.com/directions/v2';
 
             // After a delay, gather information.
             setTimeout(function() {
@@ -152,17 +222,59 @@
                 // Team number.
                 $('#event-team').text(teamNumber);
 
-                // Event Information.
-                $.getJSON(`${baseUrl}/event/${eventKey}/simple?X-TBA-Auth-Key=${apiKey}`, function(data) {
+                // Event Information & Directions.
+                $.getJSON(`${tbaBaseUrl}/event/${eventKey}?X-TBA-Auth-Key=${tbaApiKey}`, function(data) {
+
+                    // Title.
                     $('#event-name').text(data.name);
                     $('#event-city').text(data.city);
                     $('#event-state').text(data.state_prov);
                     $('#event-start').text(new Date(data.start_date).toLocaleDateString());
                     $('#event-end').text(new Date(data.end_date).toLocaleDateString());
+
+                    // Directions (from team's home base).
+                    $.getJSON(`${tbaBaseUrl}/team/${teamKey}?X-TBA-Auth-Key=${tbaApiKey}`, function(teamData) {
+
+                        // Format Addresses.
+                        let startAddress = formatAddress(teamData.address, teamData.city, teamData.state_prov);
+                        let endAddress = formatAddress(data.address, data.city, data.state_prov);
+
+                        // Show.
+                        $('#start-address').text(startAddress);
+                        $('#end-address').text(endAddress);
+
+                        // Get list.
+                        $.getJSON(`${mapBaseUrl}/route?key=${mapApiKey}&from=${encodeURI(startAddress)}&to=${encodeURI(endAddress)}`, function(mapData) {
+
+                            // Generate.
+                            let legs = mapData.route.legs;
+                            let output = '', maneuvers = [];
+                            for (var i=0; i<legs.length; i++) {
+                                maneuvers = legs[i].maneuvers;
+                                for (var j=0; j<maneuvers.length; j++) {
+                                    if (maneuvers[i])
+                                    output += `<div class="my-2">`+
+                                        `<div class="direction-icon-wrapper mr-1">`+
+                                            `<img src="${maneuvers[j].iconUrl}" class="direction-icon">`+
+                                        `</div>`+
+                                        `<span class="${(j == maneuvers.length-1 || j == 0) ? 'font-weight-bold' : 'font-weight-normal'}">`+
+                                            `${maneuvers[j].narrative}`+
+                                        `</span>`+
+                                    `</div>`;
+                                }
+                            }
+
+                            // Append.
+                            $('#directions-list').append(output);
+
+                        });
+
+                    });
+
                 });
 
                 // Match List.
-                $.getJSON(`${baseUrl}/event/${eventKey}/matches/simple?X-TBA-Auth-Key=${apiKey}`, function(data) {
+                $.getJSON(`${tbaBaseUrl}/event/${eventKey}/matches/simple?X-TBA-Auth-Key=${tbaApiKey}`, function(data) {
 
                     // Empty check.
                     if (data.length > 0) {
@@ -201,8 +313,6 @@
                         $('#match-list').append('<tr><td colspan="8">No Data Found</td></tr>')
 
                     }
-
-                    console.log(data);
 
                 });
 
