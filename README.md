@@ -1,4 +1,4 @@
-# ![&nbsp;](https://i.postimg.cc/d1JzGWDd/logo-docs.png) TheBluePrint
+# ![&nbsp;](https://raw.githubusercontent.com/sykeben/TheBluePrint/master/branding/logo-docs.png) TheBluePrint
 
 A simple webpage to print event information for FRC teams.
 
