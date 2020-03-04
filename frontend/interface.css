@@ -18,3 +18,8 @@
     image-rendering: crisp-edges;
 }
 .qr-text, .qr-code { text-align: center !important; }
+
+/* Fixes */
+body {
+    overflow-y: scroll;
+}
