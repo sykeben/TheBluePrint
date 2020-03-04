@@ -49,7 +49,7 @@ function formatAddress(address, city, stateProv) {
 }
 
 // Load checker & vars.
-const loadItems = 14; var loadCurrent = 0;
+var loadItems = 24; var loadCurrent = 0;
 function loadChecker() {
     if (loadCurrent == loadItems) {
         $('.container#loader').fadeOut('0.5s', function() {
@@ -80,16 +80,27 @@ function loadUpdater() {
     }
 }
 
+// Show loader & kick off checker.
+$('.container#loader').hide();
+$('.container:not(#loader)').fadeOut('0.5s', function() {
+    $('.container#loader').fadeIn('0.5s', function() {
+        setTimeout(loadChecker, 500);
+        setInterval(loadUpdater, 100);
+    });
+});
+
 // Storage.
 if (!localStorage.getItem('lastTeam')) { localStorage.setItem('lastTeam', String(5980)) }
 if (!localStorage.getItem('lastEvent')) { localStorage.setItem('lastEvent', '2020misjo') }
 var lastTeam = Number(localStorage.getItem('lastTeam'));
 var lastEvent = localStorage.getItem('lastEvent');
+loadCurrent++;
 
 // URL parameters.
 var urlParams = new URL(window.location.href).searchParams;
 var teamNumber = (urlParams.get('team') == null) ? lastTeam : Number(urlParams.get('team'));
 var eventKey = (urlParams.get('event') == null) ? lastEvent : urlParams.get('event');
+loadCurrent++;
 
 // Autofilling & Restorage.
 $('#team-input').val(teamNumber);
@@ -97,27 +108,23 @@ $('#event-input').val(eventKey);
 $('#team-header').text(teamNumber);
 localStorage.setItem('lastTeam', String(teamNumber));
 localStorage.setItem('lastEvent', eventKey);
+loadCurrent++;
 
 // TBA API config (key is public and will be removed if abused).
 var tbaApiKey = encodeURI('dNxAgQWO2qmiRwgMNa8EjbDzbjvRIgv2cJ9yMTpZhIFkNJh7tCBsrOEHNWkZ1TZx');
 var tbaBaseUrl = 'https://www.thebluealliance.com/api/v3';
 var teamKey = 'frc' + String(teamNumber);
+loadCurrent++;
 
 // MapQuest API config (key is public and will be removed if abused).
 var mapApiKey = encodeURI('IlppK5fQWTtimnCjT6ww8PwG3c7f3GrQ');
 var mapBaseUrl = 'https://open.mapquestapi.com/directions/v2';
-
-// Show loader & kick off checker.
-$('.container#loader').hide();
-$('.container:not(#loader)').fadeOut('0.5s', function() {
-    $('.container#loader').fadeIn('0.5s', function() {
-        setTimeout(loadChecker, 500);
-        setInterval(loadUpdater, 100);
-    })
-})
+loadCurrent++;
 
 // After a small delay, gather information.
 setTimeout(function() {
+
+    loadCurrent++;
 
     // Team number.
     $('#event-team').text(teamNumber);
@@ -140,6 +147,8 @@ setTimeout(function() {
     // Event Information & Directions.
     $.getJSON(`${tbaBaseUrl}/event/${eventKey}?X-TBA-Auth-Key=${tbaApiKey}`, function(data) {
 
+        loadCurrent++;
+
         // Title.
         $('#event-name').text(data.name);
         $('#event-city').text(data.city);
@@ -150,6 +159,8 @@ setTimeout(function() {
 
         // Directions (from team's home base).
         $.getJSON(`${tbaBaseUrl}/team/${teamKey}?X-TBA-Auth-Key=${tbaApiKey}`, function(teamData) {
+
+            loadCurrent++;
 
             // Format Addresses.
             let startAddress = formatAddress(teamData.address, teamData.city, teamData.state_prov);
@@ -170,6 +181,8 @@ setTimeout(function() {
 
             // Get list.
             $.getJSON(`${mapBaseUrl}/route?key=${mapApiKey}&from=${encodeURI(startAddress)}&to=${encodeURI(endAddress)}`, function(mapData) {
+
+                loadCurrent++;
 
                 // Generate.
                 let legs = mapData.route.legs;
@@ -202,6 +215,8 @@ setTimeout(function() {
 
     // Match List.
     $.getJSON(`${tbaBaseUrl}/event/${eventKey}/matches/simple?X-TBA-Auth-Key=${tbaApiKey}`, function(data) {
+
+        loadCurrent++;
 
         // Empty check.
         if (data.length > 0) {
