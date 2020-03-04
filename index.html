@@ -55,8 +55,16 @@
 
         </div>
 
+        <!-- Loader Container -->
+        <div class="container p-5 m-5 vw100" id="loader">
+            
+            <!-- Header -->
+            <h1 class="text-center">Loading... <span id="loader-precent">0</span>%</h1>
+
+        </div>
+
         <!-- Info Container -->
-        <div class="container px-5 pt-1 pb-4">
+        <div class="container px-5 pt-1 pb-4" style="display: none;">
 
             <!-- Header (Replaces navbar in printing) -->
             <div class="p-2 m-0 d-none d-print-block">
@@ -188,6 +196,24 @@
                 return output;
             }
 
+            // Load checker & vars.
+            const loadItems = 11; var loadCurrent = 0;
+            function loadChecker() {
+                if (loadCurrent == loadItems) {
+                    $('.container#loader').fadeOut('0.5s', function() {
+                        clearInterval(loadUpdater);
+                        $('.container:not(#loader)').fadeIn('0.5s');
+                    })
+                } else {
+                    setTimeout(loadChecker, 500);
+                }
+            }
+
+            // Load updater.
+            function loadUpdater() {
+                $('#loader-precent').text(Math.round((loadCurrent/loadItems)*100));
+            }
+
             // Storage.
             if (!localStorage.getItem('lastTeam')) { localStorage.setItem('lastTeam', String(5980)) }
             if (!localStorage.getItem('lastEvent')) { localStorage.setItem('lastEvent', '2020misjo') }
@@ -215,11 +241,21 @@
             var mapApiKey = encodeURI('IlppK5fQWTtimnCjT6ww8PwG3c7f3GrQ');
             var mapBaseUrl = 'https://open.mapquestapi.com/directions/v2';
 
-            // After a delay, gather information.
+            // Show loader & kick off checker.
+            $('.container#loader').hide();
+            $('.container:not(#loader)').fadeOut('0.5s', function() {
+                $('.container#loader').fadeIn('0.5s', function() {
+                    setTimeout(loadChecker, 500);
+                    setInterval(loadUpdater, 100);
+                })
+            })
+
+            // After a small delay, gather information.
             setTimeout(function() {
 
                 // Team number.
                 $('#event-team').text(teamNumber);
+                loadCurrent++;
 
                 // Event Information & Directions.
                 $.getJSON(`${tbaBaseUrl}/event/${eventKey}?X-TBA-Auth-Key=${tbaApiKey}`, function(data) {
@@ -230,6 +266,7 @@
                     $('#event-state').text(data.state_prov);
                     $('#event-start').text(new Date(data.start_date).toLocaleDateString());
                     $('#event-end').text(new Date(data.end_date).toLocaleDateString());
+                    loadCurrent++;
 
                     // Directions (from team's home base).
                     $.getJSON(`${tbaBaseUrl}/team/${teamKey}?X-TBA-Auth-Key=${tbaApiKey}`, function(teamData) {
@@ -237,10 +274,12 @@
                         // Format Addresses.
                         let startAddress = formatAddress(teamData.address, teamData.city, teamData.state_prov);
                         let endAddress = formatAddress(data.address, data.city, data.state_prov);
+                        loadCurrent++;
 
                         // Show.
                         $('#start-address').text(startAddress);
                         $('#end-address').text(endAddress);
+                        loadCurrent++;
 
                         // Get list.
                         $.getJSON(`${mapBaseUrl}/route?key=${mapApiKey}&from=${encodeURI(startAddress)}&to=${encodeURI(endAddress)}`, function(mapData) {
@@ -262,9 +301,11 @@
                                     `</div>`;
                                 }
                             }
+                            loadCurrent++;
 
                             // Append.
                             $('#directions-list').append(output);
+                            loadCurrent++;
 
                         });
 
@@ -280,6 +321,7 @@
 
                         // Data structure.
                         let matches = { qm: [], qf: [], sf: [], ff: [] };
+                        loadCurrent++;
 
                         // Catagorize.
                         for (let i=0; i<data.length; i++) {
@@ -289,12 +331,14 @@
                             if (type == 'sf') matches.sf.push(data[i]);
                             if (type ==  'f') matches.ff.push(data[i]);
                         }
+                        loadCurrent++;
 
                         // Sort.
                         matches.qm = sortMatches(matches.qm);
                         matches.qf = sortMatches(matches.qf);
                         matches.sf = sortMatches(matches.sf);
                         matches.ff = sortMatches(matches.ff);
+                        loadCurrent++;
 
                         // Generate.
                         let output;
@@ -302,20 +346,23 @@
                         output += generateMatchItems(matches.qf);
                         output += generateMatchItems(matches.sf);
                         output += generateMatchItems(matches.ff);
+                        loadCurrent++;
 
                         // Append.
                         $('#match-list').append(output);
+                        loadCurrent++;
 
                     } else {
 
                         // Append error.
-                        $('#match-list').append('<tr><td colspan="8">No Data Found</td></tr>')
+                        $('#match-list').append('<tr><td colspan="8">No Data Found</td></tr>');
+                        loadCurrent+=5;
 
                     }
 
                 });
 
-            }, 1000);
+            }, 250);
             
         </script>
 
