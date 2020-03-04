@@ -1,9 +1,39 @@
-// Team formatting function.
+// Team formatter.
 function formatTeam(key) {
     if (key == undefined || key == null || key == '') key = 'frcN/A';
     key = key.replace('frc', '');
     if (key == teamNumber) return `<strong>${key}</strong>`;
     else return key;
+}
+
+// Day mapper.
+function mapDay(day, shorten) {
+    if (day == 0) return (shorten) ? 'Sun' : 'Sunday';
+    if (day == 1) return (shorten) ? 'Mon' : 'Monday';
+    if (day == 2) return (shorten) ? 'Tue' : 'Tuesday';
+    if (day == 3) return (shorten) ? 'Wed' : 'Wednesday';
+    if (day == 4) return (shorten) ? 'Thu' : 'Thursday';
+    if (day == 5) return (shorten) ? 'Fri' : 'Friday';
+    if (day == 6) return (shorten) ? 'Sat' : 'Saturday';
+    else return (shorten) ? '[E]' : '[Error]';
+}
+
+// Event date formatter.
+function formatEventDate(tbaDate) {
+    let date = new Date(tbaDate);
+    let ww = mapDay(date.getDay(), false);
+    let mm = date.getMonth();
+    let dd = date.getDate();
+    return `${ww}, ${mm}/${dd}`;
+}
+
+// Match date formatter.
+function formatMatchDate(tbaDate) {
+    let date = new Date(tbaDate*1000);
+    let ww = mapDay(date.getDay(), true);
+    let hh = date.getHours()
+    let mm = (date.getMinutes() > 9) ? date.getMinutes() : '0'+date.getMinutes();
+    return `${ww}, ${hh}:${mm}`;
 }
 
 // Match item generator.
@@ -13,7 +43,7 @@ function generateMatchItems(input) {
         if (input[i] != undefined) {
             out += `<tr>`+
                 `<th scope="col" class="border-right">${input[i].comp_level.toUpperCase()} ${input[i].match_number}</th>`+
-                `<td class="border-right">${new Date(input[i].time*1000).toLocaleTimeString()}</td>`+
+                `<td class="border-right">${formatMatchDate(input[i].time)}</td>`+
                 `<td>${formatTeam(input[i].alliances.red.team_keys[0])}</td>`+
                 `<td>${formatTeam(input[i].alliances.red.team_keys[1])}</td>`+
                 `<td class="border-right">${formatTeam(input[i].alliances.red.team_keys[2])}</td>`+
@@ -153,8 +183,8 @@ setTimeout(function() {
         $('#event-name').text(data.name);
         $('#event-city').text(data.city);
         $('#event-state').text(data.state_prov);
-        $('#event-start').text(new Date(data.start_date).toLocaleDateString());
-        $('#event-end').text(new Date(data.end_date).toLocaleDateString());
+        $('#event-start').text(formatEventDate(data.start_date));
+        $('#event-end').text(formatEventDate(data.end_date));
         loadCurrent++;
 
         // Directions (from team's home base).
